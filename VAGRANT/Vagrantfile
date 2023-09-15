@@ -1,0 +1,21 @@
+Vagrant.configure("2") do |config|
+	config.vm.box = "ubuntu/trusty64"
+	config.vm.boot_timeout = 10000
+
+	# if we want access to the gui desktop, we can 
+	config.vm.provider "virtualbox" do |v|
+		v.gui = false
+		v.name = "pdn_fun_vm"
+	end
+
+	# TODO: figure out what these needs will be.
+	config.vm.provider "virtualbox" do |v|
+		v.memory = 4096
+		v.cpus = 4
+	end
+
+	# install the development tools
+	config.vm.provision "shell", path: "./provision.sh"
+
+end
+
