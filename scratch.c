@@ -82,7 +82,7 @@ void transposeMat64(Matrix_64 *m8)
     m8->rows[7] = _mm256_permute2f128_ps(__tt3, __tt7, 0x31);
 }
 
-void transposeLargeMat(int M, int N, float *source, int srcRowStride, int srcColStride, float *dest, int destRowStride, int destColStride)
+void transposeLargeMat(int M, int N, const float *source, int srcRowStride, int srcColStride, float *dest, int destRowStride, int destColStride)
 {
     int numBlocksM = M / 8;
     int numBlocksN = N / 8;
@@ -92,33 +92,66 @@ void transposeLargeMat(int M, int N, float *source, int srcRowStride, int srcCol
         for (int j = 0; j < numBlocksN; j++)
         {
             Matrix_64 block;
-            if (srcColStride == 1 && destColStride == 1) {
+            if (srcColStride == 1 && destColStride == 1)
+            {
                 loadMat64(&block, source + (i * 8 * srcRowStride) + (j * 8), srcRowStride);
                 transposeMat64(&block);
                 storeMat64(&block, dest + (j * 8 * destRowStride) + (i * 8), destRowStride);
             }
-            else if (srcRowStride == 1 && destRowStride == 1) {
+            else if (srcRowStride == 1 && destRowStride == 1)
+            {
                 loadMat64(&block, source + (i * 8) + (j * 8 * srcColStride), srcColStride);
                 transposeMat64(&block);
                 storeMat64(&block, dest + (j * 8) + (i * 8 * destColStride), destColStride);
             }
-            else if (srcColStride == 1 && destRowStride == 1) {
+            else if (srcColStride == 1 && destRowStride == 1)
+            {
                 loadMat64(&block, source + (i * 8 * srcRowStride) + (j * 8), srcRowStride);
                 storeMat64(&block, dest + (j * 8) + (i * 8 * destColStride), destColStride);
+            }
+            else if (srcRowStride == 1 && destColStride == 1)
+            {
+                loadMat64(&block, source + (i * 8 * srcColStride) + (j * 8), srcColStride);
+                storeMat64(&block, dest + (j * 8) + (i * 8 * destRowStride), destRowStride);
+            }
+            else if (srcRowStride > 1 && srcColStride > 1)
+            {
+                __m256i mask = _mm256_set_epi32(0, -1, 0, -1, 0, -1, 0, -1);
+                loadMat64(&block, source + (i * 8 * N) + (j * 8), N);
+
+                for (int k = 0; k < 8; k++) {
+                    block.rows[k] = _mm256_and_ps(block.rows[k], _mm256_castsi256_ps(mask));
+                }
+                storeMat64(&block, dest + (i * 8 * N) + (j * 8), N);
             }
         }
     }
 }
 
-void templateFunction(int m, int n, float *src, int rs_s, int cs_s,
+void copyMatrix(int M, int N, const float *source, float *dest)
+{
+    int numBlocksM = M / 8;
+    int numBlocksN = N / 8;
+    for (int i = 0; i < numBlocksM; i++)
+    {
+        for (int j = 0; j < numBlocksN; j++)
+        {
+            Matrix_64 block;
+            loadMat64(&block, source + (i * 8 * N) + (j * 8), N);
+            storeMat64(&block, dest + (i * 8 * N) + (j * 8), N);
+        }
+    }
+}
+
+void templateFunction(int m, int n, const float *src, int rs_s, int cs_s,
                       float *dst, int rs_d, int cs_d)
 {
-  for( int i = 0; i < m; ++i )
-    for( int j = 0; j < n; ++j )
-      {
-	dst[ j*rs_d + i*cs_d ] =
-	  src[ i*rs_s + j*cs_s ];
-      }
+    for (int i = 0; i < m; ++i)
+        for (int j = 0; j < n; ++j)
+        {
+            dst[j * rs_d + i * cs_d] =
+                src[i * rs_s + j * cs_s];
+        }
 }
 
 // gcc -o scratch.o scratch.c -mavx
@@ -126,25 +159,28 @@ int main()
 {
     int m = 16;
     int n = 16;
-    int rs_s = 16;
-    int cs_s = 1;
-    int rs_d = 1;
-    int cs_d = 16;
+    int rs_s = 2;
+    int cs_s = 16;
+    int rs_d = 16;
+    int cs_d = 2;
 
     int size = m * n; // The size of the array, including values from 0 to 255
-    float *source = (float *)malloc(size * sizeof(float));
-    for (int i = 0; i < size; i++) {
-        source[i] = (float)i;
-    }
-    float *dest_test = malloc(size * sizeof(float));
+    float *source = malloc(size * sizeof(float));
     float *dest_baseline = malloc(size * sizeof(float));
+    float *dest_test = malloc(size * sizeof(float));
 
-    // function in this file
-    transposeLargeMat(m, n, source, rs_s, cs_s, dest_test, rs_d, cs_d);
-    //transposeLargeMat(16, 16, source, 16, 1, dest_test, 1, 16); 
+    for (int i = 0; i < size; i++)
+    {
+        source[i] = (float)i * 0.01f;
+        dest_baseline[i] = 0.f;
+        dest_test[i] = 0.f;
+    }
     // baseline
     templateFunction(m, n, source, rs_s, cs_s, dest_baseline, rs_d, cs_d);
+    // function in this file
+    transposeLargeMat(m, n, source, rs_s, cs_s, dest_test, rs_d, cs_d);
 
+    // copyMatrix(m,n,source,dest_test);
     // Print the transposed matrices
     printMatrix("out_baseline.txt", dest_baseline, 16, 16);
     printMatrix("out_test.txt", dest_test, 16, 16);

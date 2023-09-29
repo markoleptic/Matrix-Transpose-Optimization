@@ -37,3 +37,21 @@ void FUN_NAME( int m, int n,
 	  src[ i*rs_s + j*cs_s ];
       }
 }
+
+/* if (m == 32 && n ==32 && rs_s == 2) {
+      FILE *file = fopen("out_baseline.txt", "w");
+      if (file == NULL)
+      {
+          perror("Failed to open file");
+          return;
+      }
+      for (int i = 0; i < m; i++)
+      {
+          for (int j = 0; j < n; j++)
+          {
+              fprintf(file, "%8.2f ", dst[i * m + j]);
+          }
+          fprintf(file, "\n");
+      }
+      fclose(file);
+} */

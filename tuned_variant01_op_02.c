@@ -98,21 +98,38 @@ void transposeLargeMat(int M, int N, float *source, int srcRowStride, int srcCol
     {
         for (int j = 0; j < numBlocksN; j++)
         {
-            // Create a Matrix_64 block for the current 8x8 block
             Matrix_64 block;
-            if (srcColStride == 1 && destColStride == 1) {
+            if (srcRowStride == 2)
+            {
+                __m256i mask = _mm256_set_epi32(0, -1, 0, -1, 0, -1, 0, -1);
+                loadMat64(&block, source + (i * 8 * N) + (j * 8), N);
+
+                for (int k = 0; k < 8; k++) {
+                    block.rows[k] = _mm256_and_ps(block.rows[k], _mm256_castsi256_ps(mask));
+                }
+                storeMat64(&block, dest + (i * 8 * N) + (j * 8), N);
+            }
+            else if (srcColStride == 1 && destColStride == 1)
+            {
                 loadMat64(&block, source + (i * 8 * srcRowStride) + (j * 8), srcRowStride);
                 transposeMat64(&block);
                 storeMat64(&block, dest + (j * 8 * destRowStride) + (i * 8), destRowStride);
             }
-            else if (srcRowStride == 1 && destRowStride == 1) {
+            else if (srcRowStride == 1 && destRowStride == 1)
+            {
                 loadMat64(&block, source + (i * 8) + (j * 8 * srcColStride), srcColStride);
                 transposeMat64(&block);
                 storeMat64(&block, dest + (j * 8) + (i * 8 * destColStride), destColStride);
             }
-            else if (srcColStride == 1 && destRowStride == 1) {
+            else if (srcColStride == 1 && destRowStride == 1)
+            {
                 loadMat64(&block, source + (i * 8 * srcRowStride) + (j * 8), srcRowStride);
                 storeMat64(&block, dest + (j * 8) + (i * 8 * destColStride), destColStride);
+            }
+            else if (srcRowStride == 1 && destColStride == 1)
+            {
+                loadMat64(&block, source + (i * 8 * srcColStride) + (j * 8), srcColStride);
+                storeMat64(&block, dest + (j * 8) + (i * 8 * destRowStride), destRowStride);
             }
         }
     }
@@ -125,26 +142,10 @@ void transposeLargeMat(int M, int N, float *source, int srcRowStride, int srcCol
 
 void FUN_NAME(int m, int n, float *src, int rs_s, int cs_s, float *dst, int rs_d, int cs_d)
 {
-  transposeLargeMat(m, n, src, rs_s, cs_s, dst, rs_d, cs_d);
+    transposeLargeMat(m, n, src, rs_s, cs_s, dst, rs_d, cs_d);
 }
 
-// for (int i = 0; i < m; ++i)
-// {
-//   for (int j = 0; j < n; ++j)
-//   {
-//     dst[j * rs_d + i * cs_d] = src[i * rs_s + j * cs_s];
-//   }
-// } 
-
-/*   printf("src: \n\n");
-  for (int i = 0; i < m; i ++)
-  {
-    for (int j = 0; j < n; j ++)
-    {
-      printf("%f ", src[i*j + j]);
-    }
-    printf("\n");
-  }
+/*  
   M256_Set *block = malloc(sizeof(M256_Set));
   // Top-left corner
   loadMat(block, src, 8);
