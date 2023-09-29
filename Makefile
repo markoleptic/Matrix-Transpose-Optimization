@@ -5,7 +5,8 @@
 
 # Increments to use in the tests
 MIN=16
-MAX=128
+MAX=2048
+#MAX=64
 STEP=16
 
 all: run_verifier run_bench
@@ -67,6 +68,12 @@ run_bench_op2_var03: build_bench
 	./run_bench_op2_var03.x  ${MIN} ${MAX} ${STEP} 1 -${MIN}   1      -1     -1      1 | tee -a result_bench_op2_var03.csv
         # rectangular matrices, a row major and b col major
 	./run_bench_op2_var03.x  ${MIN} ${MAX} ${STEP} -${MIN} 1   1      -1     -1      1 | tee -a result_bench_op2_var03.csv
+
+
+
+
+
+
 
 run_verifier_op2_var01: build_verifier
 	touch result_verification_op2_var01.csv
@@ -135,6 +142,7 @@ build_bench:
 	./build_bench_op2.sh
 
 # TODO: Run Timer
+
 clean:
 	rm -f *.x *~ *.o
 
