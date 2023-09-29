@@ -16,6 +16,9 @@
         dst WILL NOT OVERLAP.
 
 */
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #ifndef FUN_NAME
 #define FUN_NAME baseline_transpose
