@@ -4,3 +4,6 @@
 # Ignore object files (.o) and executables (.x)
 *.o
 *.x
+
+out_baseline.txt
+out_test.txt

@@ -89,21 +89,31 @@ void transposeMat64(Matrix_64 *m8)
     m8->rows[7] = _mm256_permute2f128_ps(__tt3, __tt7, 0x31);
 }
 
-void transposeLargeMat(float *source, float *dest, int M, int N) {
+void transposeLargeMat(int M, int N, float *source, int srcRowStride, int srcColStride, float *dest, int destRowStride, int destColStride)
+{
     int numBlocksM = M / 8;
     int numBlocksN = N / 8;
     // Loop through each 8x8 block
-    for (int i = 0; i < numBlocksM; i++) {
-        for (int j = 0; j < numBlocksN; j ++) {
+    for (int i = 0; i < numBlocksM; i++)
+    {
+        for (int j = 0; j < numBlocksN; j++)
+        {
             // Create a Matrix_64 block for the current 8x8 block
             Matrix_64 block;
-            loadMat64(&block, source + i * 8 * N + j * 8, N);
-
-            // Transpose the block in-place
-            transposeMat64(&block);
-
-            // Store the transposed block to the destination
-            storeMat64(&block, dest + j * 8 * M + i * 8, M);
+            if (srcColStride == 1 && destColStride == 1) {
+                loadMat64(&block, source + (i * 8 * srcRowStride) + (j * 8), srcRowStride);
+                transposeMat64(&block);
+                storeMat64(&block, dest + (j * 8 * destRowStride) + (i * 8), destRowStride);
+            }
+            else if (srcRowStride == 1 && destRowStride == 1) {
+                loadMat64(&block, source + (i * 8) + (j * 8 * srcColStride), srcColStride);
+                transposeMat64(&block);
+                storeMat64(&block, dest + (j * 8) + (i * 8 * destColStride), destColStride);
+            }
+            else if (srcColStride == 1 && destRowStride == 1) {
+                loadMat64(&block, source + (i * 8 * srcRowStride) + (j * 8), srcRowStride);
+                storeMat64(&block, dest + (j * 8) + (i * 8 * destColStride), destColStride);
+            }
         }
     }
 }
@@ -115,7 +125,7 @@ void transposeLargeMat(float *source, float *dest, int M, int N) {
 
 void FUN_NAME(int m, int n, float *src, int rs_s, int cs_s, float *dst, int rs_d, int cs_d)
 {
-  transposeLargeMat(src, dst, m, n);
+  transposeLargeMat(m, n, src, rs_s, cs_s, dst, rs_d, cs_d);
 }
 
 // for (int i = 0; i < m; ++i)

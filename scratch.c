@@ -82,54 +82,76 @@ void transposeMat64(Matrix_64 *m8)
     m8->rows[7] = _mm256_permute2f128_ps(__tt3, __tt7, 0x31);
 }
 
-void transposeLargetMat(float *source, float *dest, int M, int N) {
+void transposeLargeMat(int M, int N, float *source, int srcRowStride, int srcColStride, float *dest, int destRowStride, int destColStride)
+{
     int numBlocksM = M / 8;
     int numBlocksN = N / 8;
     // Loop through each 8x8 block
-    for (int i = 0; i < numBlocksM; i++) {
-        for (int j = 0; j < numBlocksN; j ++) {
-            // Create a Matrix_64 block for the current 8x8 block
+    for (int i = 0; i < numBlocksM; i++)
+    {
+        for (int j = 0; j < numBlocksN; j++)
+        {
             Matrix_64 block;
-            loadMat64(&block, source + i * 8 * N + j * 8, N);
-
-            // Transpose the block in-place
-            transposeMat64(&block);
-
-            // Store the transposed block to the destination
-            storeMat64(&block, dest + j * 8 * M + i * 8, M);
+            if (srcColStride == 1 && destColStride == 1) {
+                loadMat64(&block, source + (i * 8 * srcRowStride) + (j * 8), srcRowStride);
+                transposeMat64(&block);
+                storeMat64(&block, dest + (j * 8 * destRowStride) + (i * 8), destRowStride);
+            }
+            else if (srcRowStride == 1 && destRowStride == 1) {
+                loadMat64(&block, source + (i * 8) + (j * 8 * srcColStride), srcColStride);
+                transposeMat64(&block);
+                storeMat64(&block, dest + (j * 8) + (i * 8 * destColStride), destColStride);
+            }
+            else if (srcColStride == 1 && destRowStride == 1) {
+                loadMat64(&block, source + (i * 8 * srcRowStride) + (j * 8), srcRowStride);
+                storeMat64(&block, dest + (j * 8) + (i * 8 * destColStride), destColStride);
+            }
         }
     }
 }
 
+void templateFunction(int m, int n, float *src, int rs_s, int cs_s,
+                      float *dst, int rs_d, int cs_d)
+{
+  for( int i = 0; i < m; ++i )
+    for( int j = 0; j < n; ++j )
+      {
+	dst[ j*rs_d + i*cs_d ] =
+	  src[ i*rs_s + j*cs_s ];
+      }
+}
+
+// gcc -o scratch.o scratch.c -mavx
 int main()
 {
-    float source[] = {0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 
-                    8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 
-                    16.0f, 17.0f, 18.0f, 19.0f, 20.0f, 21.0f, 22.0f, 23.0f, 
-                    24.0f, 25.0f, 26.0f, 27.0f, 28.0f, 29.0f, 30.0f, 31.0f, 
-                    32.0f, 33.0f, 34.0f, 35.0f, 36.0f, 37.0f, 38.0f, 39.0f, 
-                    40.0f, 41.0f, 42.0f, 43.0f, 44.0f, 45.0f, 46.0f, 47.0f, 
-                    48.0f, 49.0f, 50.0f, 51.0f, 52.0f, 53.0f, 54.0f, 55.0f, 
-                    56.0f, 57.0f, 58.0f, 59.0f, 60.0f, 61.0f, 62.0f, 63.0f,
-                    64.0, 65.0, 66.0, 67.0, 68.0, 69.0, 70.0, 71.0, 
-                    72.0, 73.0, 74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 
-                    80.0, 81.0, 82.0, 83.0, 84.0, 85.0, 86.0, 87.0, 
-                    88.0, 89.0, 90.0, 91.0, 92.0, 93.0, 94.0, 95.0,
-                    96.0, 97.0, 98.0, 99.0, 100.0, 101.0, 102.0, 103.0, 
-                    104.0, 105.0, 106.0, 107.0, 108.0, 109.0, 110.0, 111.0, 
-                    112.0, 113.0, 114.0, 115.0, 116.0, 117.0, 118.0, 119.0, 
-                    120.0,121.0, 122.0, 123.0, 124.0, 125.0, 126.0, 127.0};
-    float *src = source;
-    float *dest = malloc(128 * sizeof(float));
+    int m = 16;
+    int n = 16;
+    int rs_s = 16;
+    int cs_s = 1;
+    int rs_d = 1;
+    int cs_d = 16;
 
-    transposeLargetMat(source, dest, 16, 8);
+    int size = m * n; // The size of the array, including values from 0 to 255
+    float *source = (float *)malloc(size * sizeof(float));
+    for (int i = 0; i < size; i++) {
+        source[i] = (float)i;
+    }
+    float *dest_test = malloc(size * sizeof(float));
+    float *dest_baseline = malloc(size * sizeof(float));
 
-    // Print the transposed matrix
-    const char *filename = "out.txt";
-    printMatrix(filename, dest, 8, 16);
+    // function in this file
+    transposeLargeMat(m, n, source, rs_s, cs_s, dest_test, rs_d, cs_d);
+    //transposeLargeMat(16, 16, source, 16, 1, dest_test, 1, 16); 
+    // baseline
+    templateFunction(m, n, source, rs_s, cs_s, dest_baseline, rs_d, cs_d);
 
-    free(dest);
+    // Print the transposed matrices
+    printMatrix("out_baseline.txt", dest_baseline, 16, 16);
+    printMatrix("out_test.txt", dest_test, 16, 16);
 
+    free(source);
+    free(dest_test);
+    free(dest_baseline);
     return 0;
 }
 
