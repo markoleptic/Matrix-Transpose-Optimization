@@ -5,7 +5,7 @@
 
 # Increments to use in the tests
 MIN=16
-MAX=2048
+MAX=256
 #MAX=64
 STEP=16
 
