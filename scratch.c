@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <immintrin.h>
 
+#define MAT_SIDE_LENGTH 8
+
 void printMatrix(const char *filename, const float *matrix, int rows, int cols)
 {
     FILE *file = fopen(filename, "w");
@@ -82,48 +84,43 @@ void transposeMat64(Matrix_64 *m8)
     m8->rows[7] = _mm256_permute2f128_ps(__tt3, __tt7, 0x31);
 }
 
-void transposeLargeMat(int M, int N, const float *source, int srcRowStride, int srcColStride, float *dest, int destRowStride, int destColStride)
+void transposeLargeMat(int m, int n, float *src, int rs_s, int cs_s, float *dst, int rs_d, int cs_d)
 {
-    int numBlocksM = M / 8;
-    int numBlocksN = N / 8;
+    int numBlocksM = m / 8;
+    int numBlocksN = n / 8;
     // Loop through each 8x8 block
     for (int i = 0; i < numBlocksM; i++)
     {
         for (int j = 0; j < numBlocksN; j++)
         {
             Matrix_64 block;
-            if (srcColStride == 1 && destColStride == 1)
-            {
-                loadMat64(&block, source + (i * 8 * srcRowStride) + (j * 8), srcRowStride);
-                transposeMat64(&block);
-                storeMat64(&block, dest + (j * 8 * destRowStride) + (i * 8), destRowStride);
-            }
-            else if (srcRowStride == 1 && destRowStride == 1)
-            {
-                loadMat64(&block, source + (i * 8) + (j * 8 * srcColStride), srcColStride);
-                transposeMat64(&block);
-                storeMat64(&block, dest + (j * 8) + (i * 8 * destColStride), destColStride);
-            }
-            else if (srcColStride == 1 && destRowStride == 1)
-            {
-                loadMat64(&block, source + (i * 8 * srcRowStride) + (j * 8), srcRowStride);
-                storeMat64(&block, dest + (j * 8) + (i * 8 * destColStride), destColStride);
-            }
-            else if (srcRowStride == 1 && destColStride == 1)
-            {
-                loadMat64(&block, source + (i * 8 * srcColStride) + (j * 8), srcColStride);
-                storeMat64(&block, dest + (j * 8) + (i * 8 * destRowStride), destRowStride);
-            }
-            else if (srcRowStride > 1 && srcColStride > 1)
-            {
-                __m256i mask = _mm256_set_epi32(0, -1, 0, -1, 0, -1, 0, -1);
-                loadMat64(&block, source + (i * 8 * N) + (j * 8), N);
-
-                for (int k = 0; k < 8; k++) {
-                    block.rows[k] = _mm256_and_ps(block.rows[k], _mm256_castsi256_ps(mask));
-                }
-                storeMat64(&block, dest + (i * 8 * N) + (j * 8), N);
-            }
+      if (rs_s > 1 && rs_d > 1 && cs_s > 1 && cs_d > 1)
+      {
+        loadMat64(&block, src + (i * MAT_SIDE_LENGTH) + (j * MAT_SIDE_LENGTH * cs_s) - MAT_SIDE_LENGTH, cs_s);
+        storeMat64(&block, dst + (i * MAT_SIDE_LENGTH) + (j * MAT_SIDE_LENGTH * cs_s) - MAT_SIDE_LENGTH, cs_s);
+      }
+      else if (cs_s == 1 && cs_d == 1)
+      {
+        loadMat64(&block, src + (i * MAT_SIDE_LENGTH * rs_s) + (j * MAT_SIDE_LENGTH), rs_s);
+        transposeMat64(&block);
+        storeMat64(&block, dst + (j * MAT_SIDE_LENGTH * rs_s) + (i * MAT_SIDE_LENGTH), rs_s);
+      }
+      else if (rs_s == 1 && rs_d == 1)
+      {
+        loadMat64(&block, src + (i * MAT_SIDE_LENGTH) + (j * MAT_SIDE_LENGTH * cs_s), cs_s);
+        transposeMat64(&block);
+        storeMat64(&block, dst + (j * MAT_SIDE_LENGTH) + (i * MAT_SIDE_LENGTH * cs_s), cs_s);
+      }
+      else if (cs_s == 1 && rs_d == 1)
+      {
+        loadMat64(&block, src + (i * MAT_SIDE_LENGTH * rs_s) + (j * MAT_SIDE_LENGTH), rs_s);
+        storeMat64(&block, dst + (j * MAT_SIDE_LENGTH) + (i * MAT_SIDE_LENGTH * rs_s), rs_s);
+      }
+      else if (rs_s == 1 && cs_d == 1)
+      {
+        loadMat64(&block, src + (i * MAT_SIDE_LENGTH * cs_s) + (j * MAT_SIDE_LENGTH), cs_s);
+        storeMat64(&block, dst + (j * MAT_SIDE_LENGTH) + (i * MAT_SIDE_LENGTH * cs_s), cs_s);
+      }
         }
     }
 }
@@ -374,3 +371,28 @@ void transpose_big(int m, int n,
     }
   }
 } */
+
+/*     __m256 tmp0 = _mm256_setr_ps(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
+    __m256 tmp2 = _mm256_setr_ps(9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0);
+
+    // Shuffle tmp0 and tmp2 using control masks
+   __m256 __tt0 = _mm256_permute2f128_ps(tmp0, tmp2, 0x20);
+   __m256 __tt1 = _mm256_permute2f128_ps(tmp0, tmp2, 0x31);
+
+    // Extract and print the results
+    float result_tt0[8];
+    float result_tt1[8];
+    _mm256_storeu_ps(result_tt0, __tt0);
+    _mm256_storeu_ps(result_tt1, __tt1);
+
+    printf("Result for __tt0: ");
+    for (int i = 0; i < 8; i++) {
+        printf("%.1f ", result_tt0[i]);
+    }
+    printf("\n");
+
+    printf("Result for __tt1: ");
+    for (int i = 0; i < 8; i++) {
+        printf("%.1f ", result_tt1[i]);
+    }
+    printf("\n"); */
