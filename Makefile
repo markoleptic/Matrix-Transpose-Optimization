@@ -13,7 +13,7 @@ all: run_verifier run_bench
 
 run_verifier: run_verifier_op2_var01 run_verifier_op2_var02 run_verifier_op2_var03
 
-run_bench: run_bench_op2_var01
+run_bench: run_bench_op2_var01 run_bench_op2_var02
 
 run_bench_op2_var01: build_bench
 	touch result_bench_op2_var01.csv
