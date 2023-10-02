@@ -11,9 +11,9 @@ STEP=16
 
 all: run_verifier run_bench
 
-run_verifier: run_verifier_op2_var01 run_verifier_op2_var02 run_verifier_op2_var03
+run_verifier: run_verifier_op2_var01 run_verifier_op2_var02 run_verifier_op2_var03 run_verifier_op2_var04 run_verifier_op2_var05 run_verifier_op2_var06
 
-run_bench: run_bench_op2_var01 run_bench_op2_var02
+run_bench: run_bench_op2_var01 run_bench_op2_var02 run_bench_op2_var03 run_bench_op2_var04 run_bench_op2_var05 run_bench_op2_var06
 
 run_bench_op2_var01: build_bench
 	touch result_bench_op2_var01.csv
@@ -69,9 +69,59 @@ run_bench_op2_var03: build_bench
         # rectangular matrices, a row major and b col major
 	./run_bench_op2_var03.x  ${MIN} ${MAX} ${STEP} -${MIN} 1   1      -1     -1      1 | tee -a result_bench_op2_var03.csv
 
+run_bench_op2_var04: build_bench
+	touch result_bench_op2_var04.csv
+        # square matrices, a and b are row major
+        #                       min    max    step    m n   rs_src cs_src rs_dst cs_dst
+	./run_bench_op2_var04.x  ${MIN} ${MAX} ${STEP} 1 1   1      -1     1      -1 | tee -a result_bench_op2_var04.csv
+        # square matrices, a and b are col major
+	./run_bench_op2_var04.x  ${MIN} ${MAX} ${STEP} 1 1   -1      1     -1      1 | tee -a result_bench_op2_var04.csv
+        # square matrices, a row major and b col major
+	./run_bench_op2_var04.x  ${MIN} ${MAX} ${STEP} 1 1   1      -1     -1      1 | tee -a result_bench_op2_var04.csv
+        # square matrices, a col major and b row major
+	./run_bench_op2_var04.x  ${MIN} ${MAX} ${STEP} 1 1   -1      1     1      -1 | tee -a result_bench_op2_var04.csv
+        # square matrices, a and b general strides
+	./run_bench_op2_var04.x  ${MIN} ${MAX} ${STEP} 1 1   -2      1     1      -2 | tee -a result_bench_op2_var04.csv
+        # rectangular matrices, a row major and b col major
+	./run_bench_op2_var04.x  ${MIN} ${MAX} ${STEP} 1 -${MIN}   1      -1     -1      1 | tee -a result_bench_op2_var04.csv
+        # rectangular matrices, a row major and b col major
+	./run_bench_op2_var04.x  ${MIN} ${MAX} ${STEP} -${MIN} 1   1      -1     -1      1 | tee -a result_bench_op2_var04.csv
 
+run_bench_op2_var05: build_bench
+	touch result_bench_op2_var05.csv
+        # square matrices, a and b are row major
+        #                       min    max    step    m n   rs_src cs_src rs_dst cs_dst
+	./run_bench_op2_var05.x  ${MIN} ${MAX} ${STEP} 1 1   1      -1     1      -1 | tee -a result_bench_op2_var05.csv
+        # square matrices, a and b are col major
+	./run_bench_op2_var05.x  ${MIN} ${MAX} ${STEP} 1 1   -1      1     -1      1 | tee -a result_bench_op2_var05.csv
+        # square matrices, a row major and b col major
+	./run_bench_op2_var05.x  ${MIN} ${MAX} ${STEP} 1 1   1      -1     -1      1 | tee -a result_bench_op2_var05.csv
+        # square matrices, a col major and b row major
+	./run_bench_op2_var05.x  ${MIN} ${MAX} ${STEP} 1 1   -1      1     1      -1 | tee -a result_bench_op2_var05.csv
+        # square matrices, a and b general strides
+	./run_bench_op2_var05.x  ${MIN} ${MAX} ${STEP} 1 1   -2      1     1      -2 | tee -a result_bench_op2_var05.csv
+        # rectangular matrices, a row major and b col major
+	./run_bench_op2_var05.x  ${MIN} ${MAX} ${STEP} 1 -${MIN}   1      -1     -1      1 | tee -a result_bench_op2_var05.csv
+        # rectangular matrices, a row major and b col major
+	./run_bench_op2_var05.x  ${MIN} ${MAX} ${STEP} -${MIN} 1   1      -1     -1      1 | tee -a result_bench_op2_var05.csv
 
-
+run_bench_op2_var06: build_bench
+	touch result_bench_op2_var06.csv
+        # square matrices, a and b are row major
+        #                       min    max    step    m n   rs_src cs_src rs_dst cs_dst
+	./run_bench_op2_var06.x  ${MIN} ${MAX} ${STEP} 1 1   1      -1     1      -1 | tee -a result_bench_op2_var06.csv
+        # square matrices, a and b are col major
+	./run_bench_op2_var06.x  ${MIN} ${MAX} ${STEP} 1 1   -1      1     -1      1 | tee -a result_bench_op2_var06.csv
+        # square matrices, a row major and b col major
+	./run_bench_op2_var06.x  ${MIN} ${MAX} ${STEP} 1 1   1      -1     -1      1 | tee -a result_bench_op2_var06.csv
+        # square matrices, a col major and b row major
+	./run_bench_op2_var06.x  ${MIN} ${MAX} ${STEP} 1 1   -1      1     1      -1 | tee -a result_bench_op2_var06.csv
+        # square matrices, a and b general strides
+	./run_bench_op2_var06.x  ${MIN} ${MAX} ${STEP} 1 1   -2      1     1      -2 | tee -a result_bench_op2_var06.csv
+        # rectangular matrices, a row major and b col major
+	./run_bench_op2_var06.x  ${MIN} ${MAX} ${STEP} 1 -${MIN}   1      -1     -1      1 | tee -a result_bench_op2_var06.csv
+        # rectangular matrices, a row major and b col major
+	./run_bench_op2_var06.x  ${MIN} ${MAX} ${STEP} -${MIN} 1   1      -1     -1      1 | tee -a result_bench_op2_var06.csv
 
 
 
@@ -132,7 +182,62 @@ run_verifier_op2_var03: build_verifier
 	./run_test_op2_var03.x  ${MIN} ${MAX} ${STEP} -${MIN} 1   1      -1     -1      1 | tee -a result_verification_op2_var03.csv
 	grep -i "FAIL" result_verification_op2_var03.csv | wc -l
 
+run_verifier_op2_var04: build_verifier
+	touch result_verification_op2_var04.csv
+        # square matrices, a and b are row major
+        #                       min    max    step    m n   rs_src cs_src rs_dst cs_dst
+	./run_test_op2_var04.x  ${MIN} ${MAX} ${STEP} 1 1   1      -1     1      -1 | tee -a result_verification_op2_var04.csv
+        # square matrices, a and b are col major
+	./run_test_op2_var04.x  ${MIN} ${MAX} ${STEP} 1 1   -1      1     -1      1 | tee -a result_verification_op2_var04.csv
+        # square matrices, a row major and b col major
+	./run_test_op2_var04.x  ${MIN} ${MAX} ${STEP} 1 1   1      -1     -1      1 | tee -a result_verification_op2_var04.csv
+        # square matrices, a col major and b row major
+	./run_test_op2_var04.x  ${MIN} ${MAX} ${STEP} 1 1   -1      1     1      -1 | tee -a result_verification_op2_var04.csv
+        # square matrices, a and b general strides
+	./run_test_op2_var04.x  ${MIN} ${MAX} ${STEP} 1 1   -2      1     1      -2 | tee -a result_verification_op2_var04.csv
+        # rectangular matrices, a row major and b col major
+	./run_test_op2_var04.x  ${MIN} ${MAX} ${STEP} 1 -${MIN}   1      -1     -1      1 | tee -a result_verification_op2_var04.csv
+        # rectangular matrices, a row major and b col major
+	./run_test_op2_var04.x  ${MIN} ${MAX} ${STEP} -${MIN} 1   1      -1     -1      1 | tee -a result_verification_op2_var04.csv
+	grep -i "FAIL" result_verification_op2_var04.csv | wc -l
 
+run_verifier_op2_var05: build_verifier
+	touch result_verification_op2_var05.csv
+        # square matrices, a and b are row major
+        #                       min    max    step    m n   rs_src cs_src rs_dst cs_dst
+	./run_test_op2_var05.x  ${MIN} ${MAX} ${STEP} 1 1   1      -1     1      -1 | tee -a result_verification_op2_var05.csv
+        # square matrices, a and b are col major
+	./run_test_op2_var05.x  ${MIN} ${MAX} ${STEP} 1 1   -1      1     -1      1 | tee -a result_verification_op2_var05.csv
+        # square matrices, a row major and b col major
+	./run_test_op2_var05.x  ${MIN} ${MAX} ${STEP} 1 1   1      -1     -1      1 | tee -a result_verification_op2_var05.csv
+        # square matrices, a col major and b row major
+	./run_test_op2_var05.x  ${MIN} ${MAX} ${STEP} 1 1   -1      1     1      -1 | tee -a result_verification_op2_var05.csv
+        # square matrices, a and b general strides
+	./run_test_op2_var05.x  ${MIN} ${MAX} ${STEP} 1 1   -2      1     1      -2 | tee -a result_verification_op2_var05.csv
+        # rectangular matrices, a row major and b col major
+	./run_test_op2_var05.x  ${MIN} ${MAX} ${STEP} 1 -${MIN}   1      -1     -1      1 | tee -a result_verification_op2_var05.csv
+        # rectangular matrices, a row major and b col major
+	./run_test_op2_var05.x  ${MIN} ${MAX} ${STEP} -${MIN} 1   1      -1     -1      1 | tee -a result_verification_op2_var05.csv
+	grep -i "FAIL" result_verification_op2_var05.csv | wc -l
+
+run_verifier_op2_var06: build_verifier
+	touch result_verification_op2_var06.csv
+        # square matrices, a and b are row major
+        #                       min    max    step    m n   rs_src cs_src rs_dst cs_dst
+	./run_test_op2_var06.x  ${MIN} ${MAX} ${STEP} 1 1   1      -1     1      -1 | tee -a result_verification_op2_var06.csv
+        # square matrices, a and b are col major
+	./run_test_op2_var06.x  ${MIN} ${MAX} ${STEP} 1 1   -1      1     -1      1 | tee -a result_verification_op2_var06.csv
+        # square matrices, a row major and b col major
+	./run_test_op2_var06.x  ${MIN} ${MAX} ${STEP} 1 1   1      -1     -1      1 | tee -a result_verification_op2_var06.csv
+        # square matrices, a col major and b row major
+	./run_test_op2_var06.x  ${MIN} ${MAX} ${STEP} 1 1   -1      1     1      -1 | tee -a result_verification_op2_var06.csv
+        # square matrices, a and b general strides
+	./run_test_op2_var06.x  ${MIN} ${MAX} ${STEP} 1 1   -2      1     1      -2 | tee -a result_verification_op2_var06.csv
+        # rectangular matrices, a row major and b col major
+	./run_test_op2_var06.x  ${MIN} ${MAX} ${STEP} 1 -${MIN}   1      -1     -1      1 | tee -a result_verification_op2_var06.csv
+        # rectangular matrices, a row major and b col major
+	./run_test_op2_var06.x  ${MIN} ${MAX} ${STEP} -${MIN} 1   1      -1     -1      1 | tee -a result_verification_op2_var06.csv
+	grep -i "FAIL" result_verification_op2_var06.csv | wc -l
 
 build_verifier:
 	./build_test_op2.sh

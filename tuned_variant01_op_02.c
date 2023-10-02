@@ -1,3 +1,5 @@
+/** First variant, only focused on passing tests. */
+
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>

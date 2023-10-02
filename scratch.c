@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <immintrin.h>
+#include <omp.h>
 
 #define MAT_SIDE_LENGTH 8
 
@@ -160,7 +161,7 @@ int main()
     int cs_s = 16;
     int rs_d = 16;
     int cs_d = 2;
-
+    int max_threads = omp_get_max_threads();
     int size = m * n; // The size of the array, including values from 0 to 255
     float *source = malloc(size * sizeof(float));
     float *dest_baseline = malloc(size * sizeof(float));

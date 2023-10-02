@@ -9,6 +9,7 @@ This variant implements OpenMP threading to parallelize multiple 8x8 transpositi
 #include <stdlib.h>
 #include <stdio.h>
 #include <immintrin.h>
+#include <omp.h>
 
 #define MAT_SIDE_LENGTH 8
 
