@@ -1,0 +1,10 @@
+Our team managed to successfully work on LAB01, it was divided from the start using the sow-timeline.txt and was pretty much stuck to.
+
+This is how we intially and finally split the work:
+Mark: implement 1, 2, 3, 4 (dispatcher, 1 level of tiling, transposition kernel, SIMD)
+Daniel: Implement 5, 6, and 7 (loop restructuring, shared memory parallelism).
+Thi: write report and also implement it in LaTeX
+
+We decided as a team the workload was split (33/33/33). Our statement of work came down how we expected to in terms of us being caught in the swing of schools starting back up so there was some latency/procrastination on our ends, but overall, seemed fair and evenly distributed. Most of the time and effort came in understanding C tendencies, as well as working in a team while still trying to learn new concepts. As far as how much time our team spent on the project it was evenly split.
+
+Next time, I think we would try and sit down as a team earlier and knock out as much of the assignment we can, as early as we can. From what we discussed we think just getting straight into school and a lab took us by surprise, but it should be better as we go further into the year.
