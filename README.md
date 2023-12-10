@@ -16,5 +16,3 @@ This repository implements various parallel optimization techniques for matrix t
 - **baseline_op_02.c:** The starting point for all variants.
 - **writeup.pdf:** Contains a full description and results of the implemented optimization techniques.
 
-Feel free to explore each file for detailed implementation and optimization strategies.
-
