@@ -1,4 +1,4 @@
-# Matrix Transposition Optimization
+# Matrix Transpose Optimization
 
 This repository implements various parallel optimization techniques for matrix transposition. The starting point for all variants is `baseline_op_02.c`.
 
